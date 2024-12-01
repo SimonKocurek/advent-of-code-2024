@@ -1,18 +1,29 @@
+import kotlin.math.absoluteValue
+
 fun main() {
     fun part1(input: List<String>): Int {
-        return input.size
+        val numbers = input.map { line ->
+            line
+                .split("\\s+".toRegex())
+                .map { it.toInt() }
+        }
+
+        val firstColumn = numbers.map { it.first() }.sorted()
+        val secondColumn = numbers.map { it.last() }.sorted()
+
+        return firstColumn.zip(secondColumn).sumOf { (it.first - it.second).absoluteValue }
     }
 
     fun part2(input: List<String>): Int {
-        return input.size
+        val numbers = input.map { line ->
+            line
+                .split("\\s+".toRegex())
+                .map { it.toInt() }
+        }
+
+        val scores = numbers.groupBy { it.last().toInt() }.mapValues { it.value.size }
+        return numbers.map { it.first() }.sumOf { it * (scores[it] ?: 0) }
     }
-
-    // Test if implementation meets criteria from the description, like:
-    check(part1(listOf("test_input")) == 1)
-
-    // Or read a large test input from the `src/Day01_test.txt` file:
-    val testInput = readInput("Day01_test")
-    check(part1(testInput) == 1)
 
     // Read the input from the `src/Day01.txt` file.
     val input = readInput("Day01")
