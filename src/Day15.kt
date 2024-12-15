@@ -82,7 +82,7 @@ fun main() {
             .joinToString("")
 
         fun List<MutableList<Char>>.move(y: Int, x: Int, yDiff: Int, xDiff: Int): Boolean {
-            // Always align to the left edge of the box
+            // Always align to the left edge of the box, to eliminate edge-cases
             val currX = if (this[y][x] == ']') x - 1 else x
 
             if (this[y][currX] == '#') {
@@ -97,13 +97,11 @@ fun main() {
                 val pushedY = y + yDiff
 
                 if (
-                    !when {
-                        xDiff == -1 -> move(pushedY, pushedX, yDiff, xDiff)
-                        xDiff == 1 -> move(pushedY, pushedX + 1, yDiff, xDiff) // We need to move from the right edge
-                        // We need to check both edges
-                        yDiff == -1 -> move(pushedY, pushedX, yDiff, xDiff) && move(pushedY, pushedX + 1, yDiff, xDiff)
-                        yDiff == 1 -> move(pushedY, pushedX, yDiff, xDiff) && move(pushedY, pushedX + 1, yDiff, xDiff)
-                        else -> false
+                    !when (xDiff) {
+                        -1 -> move(pushedY, pushedX, yDiff, xDiff)
+                        1 -> move(pushedY, pushedX + 1, yDiff, xDiff) // We need to move from the right edge
+                        // On vertical moves We need to check both edges
+                        else -> move(pushedY, pushedX, yDiff, xDiff) && move(pushedY, pushedX + 1, yDiff, xDiff)
                     }
                 ) {
                     return false
