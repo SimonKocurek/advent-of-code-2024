@@ -2,13 +2,11 @@ fun main() {
     fun getAntenas(input: List<String>): Map<Char, List<Pair<Int, Int>>> {
         val antenas = mutableMapOf<Char, MutableList<Pair<Int, Int>>>()
 
-        for (y in input.indices) {
-            for (x in input[y].indices) {
-                val frequency = input[y][x]
-                if (frequency != '.') {
-                    antenas.putIfAbsent(frequency, mutableListOf())
-                    antenas[frequency]?.add(x to y)
-                }
+        input.doubleLoop { y, x ->
+            val frequency = input[y][x]
+            if (frequency != '.') {
+                antenas.putIfAbsent(frequency, mutableListOf())
+                antenas[frequency]?.add(x to y)
             }
         }
 
@@ -35,7 +33,7 @@ fun main() {
                     val newX = first.first + xDiff
                     val newY = first.second + yDiff
 
-                    if (newY < 0 || newY >= finalMap.size || newX < 0 || newX >= finalMap[newY].size) {
+                    if (!finalMap.inBounds(newY, newX)) {
                         continue
                     }
 
@@ -67,7 +65,7 @@ fun main() {
                     var newX = first.first
                     var newY = first.second
 
-                    while (newY >= 0 && newY < finalMap.size && newX >= 0 && newX < finalMap[newY].size) {
+                    while (finalMap.inBounds(newY, newX)) {
                         finalMap[newY][newX] = '#'
                         newX += xDiff
                         newY += yDiff

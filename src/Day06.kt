@@ -1,41 +1,23 @@
 fun main() {
 
-    val directions = listOf(
-        -1 to 0,
-        0 to 1,
-        1 to 0,
-        0 to -1
-    )
-
-    fun startPosition(map: List<List<Char>>): Pair<Int, Int> {
-        for (y in map.indices) {
-            for (x in map[y].indices) {
-                if (map[y][x] == '^') {
-                    return y to x
-                }
-            }
-        }
-        throw IllegalStateException()
-    }
-
     fun part1(input: List<String>): Int {
         var directionIndex = 0
         val map = input.map { it.toMutableList() }
 
-        var (y, x) = startPosition(map)
+        var (y, x) = map.findPosition('^')
         while (true) {
             map[y][x] = 'X'
 
-            val (yDiff, xDiff) = directions[directionIndex]
+            val (yDiff, xDiff) = directions4[directionIndex]
             val newY = y + yDiff
             val newX = x + xDiff
 
-            if (newY < 0 || newY >= map.size || newX < 0 || newX >= map[newY].size) {
+            if (!map.inBounds(newY, newX)) {
                 break
             }
 
             if (map[newY][newX] == '#') {
-                directionIndex = (directionIndex + 1) % directions.size
+                directionIndex = (directionIndex + 1) % directions4.size
             } else {
                 y = newY
                 x = newX
@@ -48,16 +30,14 @@ fun main() {
     fun part2(input: List<String>): Int {
         val map = input.map { it.toList() }
 
-        val (yStart, xStart) = startPosition(map)
+        val (yStart, xStart) = map.findPosition('^')
 
         val changedMaps = mutableListOf<List<List<Char>>>()
-        for (y in map.indices) {
-            for (x in map[y].indices) {
-                if (map[y][x] == '.') {
-                    val copy = map.map { it.toMutableList() }
-                    copy[y][x] = '#'
-                    changedMaps.add(copy)
-                }
+        map.doubleLoop { y, x ->
+            if (map[y][x] == '.') {
+                val copy = map.map { it.toMutableList() }
+                copy[y][x] = '#'
+                changedMaps.add(copy)
             }
         }
 
@@ -70,16 +50,16 @@ fun main() {
             while (Triple(x, y, directionIndex) !in visited) {
                 visited.add(Triple(x, y, directionIndex))
 
-                val (yDiff, xDiff) = directions[directionIndex]
+                val (yDiff, xDiff) = directions4[directionIndex]
                 val newY = y + yDiff
                 val newX = x + xDiff
 
-                if (newY < 0 || newY >= map.size || newX < 0 || newX >= map[newY].size) {
+                if (!map.inBounds(newY, newX)) {
                     return@count false
                 }
 
                 if (map[newY][newX] == '#') {
-                    directionIndex = (directionIndex + 1) % directions.size
+                    directionIndex = (directionIndex + 1) % directions4.size
                 } else {
                     y = newY
                     x = newX

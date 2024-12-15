@@ -1,24 +1,13 @@
 fun main() {
     fun part1(input: List<String>): Long {
         val word = "XMAS"
-        val directions = listOf(
-            listOf(1, 0),
-            listOf(1, 1),
-            listOf(0, 1),
-            listOf(-1, 1),
-            listOf(-1, 0),
-            listOf(-1, -1),
-            listOf(0, -1),
-            listOf(1, -1),
-        )
-
         var result = 0L
 
         fun crawl(i: Int, x: Int, y: Int, xDiff: Int, yDiff: Int) {
             val newX = x + xDiff
             val newY = y + yDiff
 
-            if (newY < 0 || newY >= input.size || newX < 0 || newX >= input[newY].length) {
+            if (!input.inBounds(newY, newX)) {
                 return
             }
 
@@ -33,15 +22,13 @@ fun main() {
             }
         }
 
-        for (y in input.indices) {
-            for (x in input[y].indices) {
-                if (input[y][x] != word[0]) {
-                    continue
-                }
+        input.doubleLoop { y, x ->
+            if (input[y][x] != word[0]) {
+                return@doubleLoop
+            }
 
-                directions.forEach { (xDiff, yDiff) ->
-                    crawl(0, x, y, xDiff, yDiff)
-                }
+            directions8.forEach { (xDiff, yDiff) ->
+                crawl(0, x, y, xDiff, yDiff)
             }
         }
 
@@ -81,22 +68,19 @@ fun main() {
 
         var result = 0L
 
-        for (y in 1 until input.size - 1) {
-            for (x in 1 until input[y].length - 1) {
-                if (input[y][x] != 'A') {
-                    continue
-                }
+        input.doubleLoop { y, x ->
+            if (input[y][x] != 'A') {
+                return@doubleLoop
+            }
 
-                val found = rotations.any { rotation ->
-                    rotation.all { expected ->
-                        input[y + expected.first][x + expected.second] == expected.third
-                    }
+            val found = rotations.any { rotation ->
+                rotation.all { expected ->
+                    input[y + expected.first][x + expected.second] == expected.third
                 }
+            }
 
-                if (found) {
-                    result++
-                }
-
+            if (found) {
+                result++
             }
         }
 

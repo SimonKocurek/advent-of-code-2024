@@ -1,7 +1,6 @@
 import java.awt.image.BufferedImage
 import java.awt.image.BufferedImage.TYPE_INT_RGB
 import java.io.File
-import java.util.*
 import javax.imageio.ImageIO
 import kotlin.math.sqrt
 
@@ -69,21 +68,15 @@ fun main() {
     fun part2(input: List<String>) {
         val robots = parseRobots(input)
 
-        fun Robot.nearestRobots(robots: List<Robot>) =
-            PriorityQueue(
-                robots.map { other ->
-                    sqrt((x - other.x) * (x - other.x) + (y - other.y) * (y - other.y).toDouble()).toLong()
-                }
+        fun Robot.nearestRobots(robots: List<Robot>) = robots.map { other ->
+            sqrt((x - other.x) * (x - other.x) + (y - other.y) * (y - other.y).toDouble()).toLong()
+            // When robots are clumped up, the closest ones will be very close
+            // If they are scattered, the closest ones will be fairly far away
+        }.takeSorted(10).sum()
 
-                // When robots are clumped up, the closest ones will be very close
-                // If they are scattered, the closest ones will be fairly far away
-            ).take(10).sum()
-
-        fun List<Robot>.sparsity() = PriorityQueue(
-            map { it.nearestRobots(this) }
-        )
+        fun List<Robot>.sparsity() = map { it.nearestRobots(this) }
             // To eliminate outliers and detect clumping, we only consider the closest 20%
-            .take(size / 5).sum()
+            .takeSorted(size / 5).sum()
 
         var i = 0
         while (robots.sparsity() > 1300) {

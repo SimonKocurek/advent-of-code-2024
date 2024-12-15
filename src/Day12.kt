@@ -2,60 +2,50 @@ import java.util.Stack
 
 fun main() {
 
-    val directions = listOf(
-        0 to 1,
-        0 to -1,
-        1 to 0,
-        -1 to 0
-    )
-
     fun part1(input: List<String>): Long {
         var result = 0L
 
         val seen = input.map { it.map { false }.toMutableList() }
 
-        for (y in input.indices) {
-            for (x in input[y].indices) {
+        input.doubleLoop { y, x ->
+            if (seen[y][x]) {
+                return@doubleLoop
+            }
 
-                if (seen[y][x]) {
-                    continue
-                }
+            var size = 1
+            var edge = 0
+            val stack = Stack<Pair<Int, Int>>().apply {
+                add(x to y)
+            }
+            seen[y][x] = true
+            while (stack.isNotEmpty()) {
+                val (currX, currY) = stack.pop()
 
-                var size = 1
-                var edge = 0
-                val stack = Stack<Pair<Int, Int>>().apply {
-                    add(x to y)
-                }
-                seen[y][x] = true
-                while (stack.isNotEmpty()) {
-                    val (currX, currY) = stack.pop()
+                for ((xDiff, yDiff) in directions4) {
+                    val newX = currX + xDiff
+                    val newY = currY + yDiff
 
-                    for ((xDiff, yDiff) in directions) {
-                        val newX = currX + xDiff
-                        val newY = currY + yDiff
+                    if (!input.inBounds(newY, newX)) {
+                        edge++
+                        continue
+                    }
 
-                        if (newY < 0 || newY >= input.size || newX < 0 || newX >= input[newY].length) {
-                            edge++
+                    if (input[newY][newX] == input[currY][currX]) {
+                        if (seen[newY][newX]) {
                             continue
                         }
 
-                        if (input[newY][newX] == input[currY][currX]) {
-                            if (seen[newY][newX]) {
-                                continue
-                            }
-
-                            size++
-                            stack.add(newX to newY)
-                            seen[newY][newX] = true
-                        } else {
-                            edge++
-                        }
+                        size++
+                        stack.add(newX to newY)
+                        seen[newY][newX] = true
+                    } else {
+                        edge++
                     }
-
                 }
 
-                result += size * edge
             }
+
+            result += size * edge
         }
 
         return result
@@ -68,90 +58,86 @@ fun main() {
         val plotId = input.map { it.map { -1 }.toMutableList() }
         var currId = 0
 
-        for (y in 0..maxY) {
-            for (x in 0..maxX) {
+        input.doubleLoop { y, x ->
+            if (plotId[y][x] != -1) {
+                return@doubleLoop
+            }
 
-                if (plotId[y][x] != -1) {
-                    continue
-                }
+            val stack = Stack<Pair<Int, Int>>().apply {
+                add(x to y)
+            }
+            plotId[y][x] = currId
+            while (stack.isNotEmpty()) {
+                val (currX, currY) = stack.pop()
 
-                val stack = Stack<Pair<Int, Int>>().apply {
-                    add(x to y)
-                }
-                plotId[y][x] = currId
-                while (stack.isNotEmpty()) {
-                    val (currX, currY) = stack.pop()
+                for ((xDiff, yDiff) in directions4) {
+                    val newX = currX + xDiff
+                    val newY = currY + yDiff
 
-                    for ((xDiff, yDiff) in directions) {
-                        val newX = currX + xDiff
-                        val newY = currY + yDiff
+                    if (!input.inBounds(newY, newX)) {
+                        continue
+                    }
 
-                        if (newY < 0 || newY > maxY || newX < 0 || newX > maxX) {
+                    if (input[newY][newX] == input[currY][currX]) {
+                        if (plotId[newY][newX] != -1) {
                             continue
                         }
 
-                        if (input[newY][newX] == input[currY][currX]) {
-                            if (plotId[newY][newX] != -1) {
-                                continue
-                            }
-
-                            stack.add(newX to newY)
-                            plotId[newY][newX] = currId
-                        }
+                        stack.add(newX to newY)
+                        plotId[newY][newX] = currId
                     }
-
                 }
 
-                currId++
             }
+
+            currId++
         }
 
         val corners = mutableMapOf<Int, Int>()
-        for (y in 0..maxY) {
-            for (x in 0..maxX) {
-                var currentCorners = 0
 
-                val c = plotId[y][x]
+        input.doubleLoop { y, x ->
+            var currentCorners = 0
 
-                // outer corners
-                val topEdge = x == maxX || c != plotId[y][x + 1]
-                val bottomEdge = x == 0 || c != plotId[y][x - 1]
-                val rightEdge = y == maxY || c != plotId[y + 1][x]
-                val leftEdge = y == 0 || c != plotId[y - 1][x]
+            val c = plotId[y][x]
 
-                if (topEdge && leftEdge) {
-                    currentCorners++
-                }
-                if (leftEdge && bottomEdge) {
-                    currentCorners++
-                }
-                if (bottomEdge && rightEdge) {
-                    currentCorners++
-                }
-                if (rightEdge && topEdge) {
-                    currentCorners++
-                }
+            // outer corners
+            val topEdge = x == maxX || c != plotId[y][x + 1]
+            val bottomEdge = x == 0 || c != plotId[y][x - 1]
+            val rightEdge = y == maxY || c != plotId[y + 1][x]
+            val leftEdge = y == 0 || c != plotId[y - 1][x]
 
-                // inner corners
-                val topSame = y > 0 && c == plotId[y - 1][x]
-                val bottomSame = y < maxY && c == plotId[y + 1][x]
-                val rightSame = x < maxX && c == plotId[y][x + 1]
-                val leftSame = x > 0 && c == plotId[y][x - 1]
-                if (topSame && leftSame && plotId[y -1][x - 1] != c) {
-                    currentCorners++
-                }
-                if (leftSame && bottomSame && plotId[y + 1][x - 1] != c) {
-                    currentCorners++
-                }
-                if (bottomSame && rightSame && plotId[y + 1][x + 1] != c) {
-                    currentCorners++
-                }
-                if (rightSame && topSame && plotId[y - 1][x + 1] != c) {
-                    currentCorners++
-                }
-
-                corners.merge(c, currentCorners) { a, b -> a + b }
+            if (topEdge && leftEdge) {
+                currentCorners++
             }
+            if (leftEdge && bottomEdge) {
+                currentCorners++
+            }
+            if (bottomEdge && rightEdge) {
+                currentCorners++
+            }
+            if (rightEdge && topEdge) {
+                currentCorners++
+            }
+
+            // inner corners
+            val topSame = y > 0 && c == plotId[y - 1][x]
+            val bottomSame = y < maxY && c == plotId[y + 1][x]
+            val rightSame = x < maxX && c == plotId[y][x + 1]
+            val leftSame = x > 0 && c == plotId[y][x - 1]
+            if (topSame && leftSame && plotId[y - 1][x - 1] != c) {
+                currentCorners++
+            }
+            if (leftSame && bottomSame && plotId[y + 1][x - 1] != c) {
+                currentCorners++
+            }
+            if (bottomSame && rightSame && plotId[y + 1][x + 1] != c) {
+                currentCorners++
+            }
+            if (rightSame && topSame && plotId[y - 1][x + 1] != c) {
+                currentCorners++
+            }
+
+            corners.merge(c, currentCorners) { a, b -> a + b }
         }
 
         return plotId

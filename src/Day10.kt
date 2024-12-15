@@ -2,20 +2,11 @@ import java.util.Stack
 
 fun main() {
 
-    val directions = listOf(
-        0 to 1,
-        0 to -1,
-        1 to 0,
-        -1 to 0,
-    )
-
     fun getZeros(map: List<List<Int>>): MutableList<Pair<Int, Int>> {
         val zeros = mutableListOf<Pair<Int, Int>>()
-        for (y in map.indices) {
-            for (x in map[y].indices) {
-                if (map[y][x] == 0) {
-                    zeros.add(y to x)
-                }
+        map.doubleLoop { y, x ->
+            if (map[y][x] == 0) {
+                zeros.add(y to x)
             }
         }
         return zeros
@@ -37,11 +28,11 @@ fun main() {
 
             while (following.isNotEmpty()) {
                 val (y, x) = following.pop()
-                for ((diffY, diffX) in directions) {
+                for ((diffY, diffX) in directions4) {
                     val newY = y + diffY
                     val newX = x + diffX
 
-                    if (newY < 0 || newY >= map.size || newX < 0 || newX >= map[newY].size) {
+                    if (!map.inBounds(newY, newX)) {
                         continue
                     }
 
@@ -75,31 +66,27 @@ fun main() {
         var result = 0L
         for (i in 1 .. 9) {
 
-            for (y in map.indices) {
-                for (x in map[y].indices) {
+            map.doubleLoop { y, x ->
+                if (map[y][x] != i) {
+                    return@doubleLoop
+                }
 
-                    if (map[y][x] != i) {
+                for ((diffY, diffX) in directions4) {
+                    val fromY = y + diffY
+                    val fromX = x + diffX
+
+                    if (!map.inBounds(fromY, fromX)) {
                         continue
                     }
 
-                    for ((diffY, diffX) in directions) {
-                        val fromY = y + diffY
-                        val fromX = x + diffX
-
-                        if (fromY < 0 || fromY >= map.size || fromX < 0 || fromX >= map[fromY].size) {
-                            continue
-                        }
-
-                        if (map[fromY][fromX] + 1 != map[y][x]) {
-                            continue
-                        }
-
-                        waysToReach[y][x] += waysToReach[fromY][fromX]
-                        if (i == 9) {
-                            result += waysToReach[fromY][fromX]
-                        }
+                    if (map[fromY][fromX] + 1 != map[y][x]) {
+                        continue
                     }
 
+                    waysToReach[y][x] += waysToReach[fromY][fromX]
+                    if (i == 9) {
+                        result += waysToReach[fromY][fromX]
+                    }
                 }
             }
         }
