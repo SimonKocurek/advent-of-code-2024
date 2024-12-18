@@ -1,87 +1,125 @@
 fun main() {
 
-    fun part1(input: List<String>): String {
-        var a = input[0].takeLastWhile { it.isDigit() }.toInt()
-        var b = input[1].takeLastWhile { it.isDigit() }.toInt()
-        var c = input[2].takeLastWhile { it.isDigit() }.toInt()
+    fun parseProgram(input: List<String>) = input
+        .last()
+        .substring("Program: ".length)
+        .split(",")
+        .map { it.toLong() }
 
-        val program = input
-            .last()
-            .substring("Program: ".length)
-            .split(",")
-            .map { it.toInt() }
+    fun runProgram(
+        initA: Long,
+        initB: Long,
+        initC: Long,
+        program: List<Long>
+    ) = sequence {
+        var a = initA
+        var b = initB
+        var c = initC
 
-        fun Int.combo() = when (this) {
-            in 0..3 -> this
-            4 -> a
-            5 -> b
-            6 -> c
+        fun Long.combo() = when (this) {
+            in 0L..3L -> this
+            4L -> a
+            5L -> b
+            6L -> c
             else -> error("Unexpected combo ")
         }
-
-        val output = mutableListOf<Int>()
 
         var i = 0
         while (i < program.size) {
             val op = program[i++]
             when (op) {
-                0 -> {
+                0L -> {
                     if (i == program.size) break
-                    a /= (1 shl program[i++].combo())
+                    a /= (1L shl program[i++].combo().toInt())
                 }
 
-                1 -> {
+                1L -> {
                     if (i == program.size) break
                     b = b.xor(program[i++])
                 }
 
-                2 -> {
+                2L -> {
                     if (i == program.size) break
-                    b = program[i++].combo() % 8
+                    b = program[i++].combo() % 8L
                 }
 
-                3 -> if (a != 0) {
-                    i = program[i]
+                3L -> if (a != 0L) {
+                    i = program[i].toInt()
                 }
 
-                4 -> {
+                4L -> {
                     if (i == program.size) break
                     b = b.xor(c)
                     i++
                 }
 
-                5 -> {
+                5L -> {
                     if (i == program.size) break
-                    output.add(program[i++].combo() % 8)
+                    yield(program[i++].combo() % 8)
                 }
 
-                6 -> {
+                6L -> {
                     if (i == program.size) break
-                    b = a / (1 shl program[i++].combo())
+                    b = a / (1L shl program[i++].combo().toInt())
                 }
 
-                7 -> {
+                7L -> {
                     if (i == program.size) break
-                    c = a / (1 shl program[i++].combo())
+                    c = a / (1L shl program[i++].combo().toInt())
                 }
             }
         }
+    }
+
+    fun part1(input: List<String>): String {
+        val a = input[0].takeLastWhile { it.isDigit() }.toLong()
+        val b = input[1].takeLastWhile { it.isDigit() }.toLong()
+        val c = input[2].takeLastWhile { it.isDigit() }.toLong()
+
+        val program = parseProgram(input)
+
+        val output = runProgram(a, b, c, program)
         return output.joinToString(",")
     }
 
-    fun part2(input: List<String>): Int {
-        // 0,3,5,4,3,0
+    fun part2(input: List<String>): Long {
+        val b = input[1].takeLastWhile { it.isDigit() }.toLong()
+        val c = input[2].takeLastWhile { it.isDigit() }.toLong()
 
-        // 5 -> print
-        // 3 -> jump
-        //
-        // combo % 8 == 0
-        // ...
-        // combo % 8 == 3
-        // ..
-        // combo % 8 == 4
-        // ..
-        return 0
+        val program = parseProgram(input)
+
+        // Note: There is a guarantee in the problem
+        // description that jump will jump to instructions
+        // and not to operands (treating them like instructions)
+
+        // 3 -> jump -> will be skipped when 'a' = 0
+        // for the program to terminate, we need to stop
+        // jumping, so at the end:
+        var possibleA = mutableSetOf<Long>()
+        possibleA.add(0L)
+
+        for (matchFromEnd in 1..program.size) {
+            val newPossibleA = mutableSetOf<Long>()
+
+            possibleA.forEach { a ->
+                // 5 -> print -> We know that at the printed
+                // `combo() % 8` was between 7 digits:
+                for (triedA in a..a + 7) {
+                    val output = runProgram(triedA, b, c, program)
+
+                    if (output.toList().takeLast(matchFromEnd) != program.takeLast(matchFromEnd)) {
+                        continue
+                    }
+
+                    val foundA = if (matchFromEnd == program.size) triedA else triedA shl 3
+                    newPossibleA.add(foundA)
+                }
+            }
+
+            possibleA = newPossibleA
+        }
+
+        return possibleA.min()
     }
 
     val input = readInput("Day17")
