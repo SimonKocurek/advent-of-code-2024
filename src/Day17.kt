@@ -92,9 +92,9 @@ fun main() {
         // description that jump will jump to instructions
         // and not to operands (treating them like instructions)
 
-        // 3 -> jump -> will be skipped when 'a' = 0
-        // for the program to terminate, we need to stop
-        // jumping, so at the end:
+        // jump will be skipped when 'a' = 0
+        // for the program to terminate, we need to stop jumping,
+        // so at the end, 'a' has to be 0
         var possibleA = mutableSetOf<Long>()
         possibleA.add(0L)
 
@@ -102,9 +102,9 @@ fun main() {
             val newPossibleA = mutableSetOf<Long>()
 
             possibleA.forEach { a ->
-                // 5 -> print -> We know that at the printed
-                // `combo() % 8` was between 7 digits:
-                for (triedA in a..a + 7) {
+                // Only digits between 0..7 can be printed due to `% 8`
+                for (moduloOffset in 0..7) {
+                    val triedA = a + moduloOffset
                     val output = runProgram(triedA, b, c, program)
 
                     if (output.toList().takeLast(matchFromEnd) != program.takeLast(matchFromEnd)) {
