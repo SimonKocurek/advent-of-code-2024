@@ -1,5 +1,7 @@
 fun main() {
-    fun part1(input: List<String>): Long {
+    val input = readInput("Day04")
+
+    fun part1(): Long {
         val word = "XMAS"
         var result = 0L
 
@@ -35,7 +37,7 @@ fun main() {
         return result
     }
 
-    fun part2(input: List<String>): Long {
+    fun part2(): Long {
         val rotations = listOf(
             listOf(
                 Triple(-1, -1, 'M'),
@@ -87,7 +89,6 @@ fun main() {
         return result
     }
 
-    val input = readInput("Day04")
-    part1(input).println()
-    part2(input).println()
+    part1().println()
+    part2().println()
 }

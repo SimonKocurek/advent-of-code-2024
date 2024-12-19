@@ -1,15 +1,15 @@
 fun main() {
-    fun part1(input: List<String>): Long {
-        val line = input.joinToString("\n")
-        return "mul\\((\\d+),(\\d+)\\)"
-            .toRegex()
-            .findAll(line)
-            .sumOf { it.groupValues[1].toLong() * it.groupValues[2].toInt() }
-    }
 
-    fun part2(input: List<String>): Long {
-        val line = input.joinToString("\n")
+    val input = readInput("Day03")
 
+    val line = input.joinToString("\n")
+
+    fun part1() = "mul\\((\\d+),(\\d+)\\)"
+        .toRegex()
+        .findAll(line)
+        .sumOf { it.groupValues[1].toLong() * it.groupValues[2].toInt() }
+
+    fun part2(): Long {
         var enabled = true
         var result = 0L
 
@@ -30,7 +30,6 @@ fun main() {
         return result
     }
 
-    val input = readInput("Day03")
-    part1(input).println()
-    part2(input).println()
+    part1().println()
+    part2().println()
 }

@@ -2,18 +2,21 @@ import kotlin.math.min
 
 fun main() {
 
-    fun part1(input: List<String>): Long {
-        val fileSizes = input
-            .first()
-            .filterIndexed { index, _ -> index % 2 == 0 }
-            .map { it.digitToInt() }
-            .toMutableList()
+    fun getFileSizes(input: List<String>) = input
+        .first()
+        .filterIndexed { index, _ -> index % 2 == 0 }
+        .map { it.digitToInt() }
+        .toMutableList()
 
-        val freeSpaces = input
-            .first()
-            .filterIndexed { index, _ -> index % 2 == 1 }
-            .map { it.digitToInt() }
-            .toMutableList()
+    fun getFreeSpaces(input: List<String>) = input
+        .first()
+        .filterIndexed { index, _ -> index % 2 == 1 }
+        .map { it.digitToInt() }
+        .toMutableList()
+
+    fun part1(input: List<String>): Long {
+        val fileSizes = getFileSizes(input)
+        val freeSpaces = getFreeSpaces(input)
 
         val blocks = mutableListOf<Pair<Int, Int>>()
 
@@ -59,17 +62,8 @@ fun main() {
             val isFile get() = num != -1
         }
 
-        val fileSizes = input
-            .first()
-            .filterIndexed { index, _ -> index % 2 == 0 }
-            .map { it.digitToInt() }
-            .toMutableList()
-
-        val freeSpaces = input
-            .first()
-            .filterIndexed { index, _ -> index % 2 == 1 }
-            .map { it.digitToInt() }
-            .toMutableList()
+        val fileSizes = getFileSizes(input)
+        val freeSpaces = getFreeSpaces(input)
 
         val blocks = mutableListOf<Block>()
 

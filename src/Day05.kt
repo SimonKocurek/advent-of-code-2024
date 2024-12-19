@@ -1,5 +1,17 @@
 fun main() {
 
+    val input = readInput("Day05")
+
+    val rules = input
+        .takeWhile { it.isNotBlank() }
+        .map { it.split("|") }
+        .map { it.map { num -> num.toInt() } }
+
+    val orderings = input
+        .takeLastWhile { it.isNotBlank() }
+        .map { it.split(",") }
+        .map { it.map { num -> num.toInt() } }
+
     fun isValid(
         line: List<Int>,
         shouldBeAfter: Map<Int, Set<Int>>,
@@ -11,17 +23,7 @@ fun main() {
         }
     }
 
-    fun part1(input: List<String>): Long {
-        val rules = input
-            .takeWhile { it.isNotBlank() }
-            .map { it.split("|") }
-            .map { it.map { num -> num.toInt() } }
-
-        val orderings = input
-            .takeLastWhile { it.isNotBlank() }
-            .map { it.split(",") }
-            .map { it.map { num -> num.toInt() } }
-
+    fun part1(): Long {
         val shouldBeAfter = mutableMapOf<Int, MutableSet<Int>>()
         rules.forEach { (sooner, later) ->
             shouldBeAfter.putIfAbsent(sooner, mutableSetOf())
@@ -33,23 +35,7 @@ fun main() {
         }.sumOf { it[it.size / 2].toLong() }
     }
 
-    fun part2(input: List<String>): Long {
-        val rules = input
-            .takeWhile { it.isNotBlank() }
-            .map { it.split("|") }
-            .map { it.map { num -> num.toInt() } }
-
-        val orderings = input
-            .takeLastWhile { it.isNotBlank() }
-            .map { it.split(",") }
-            .map { it.map { num -> num.toInt() } }
-            .map { it.toMutableList() }
-
-        // Safety check:
-        orderings
-            .filter { it.distinct().size != it.size }
-            .forEach { println("Line has repeating elements $it") }
-
+    fun part2(): Long {
         val shouldBeAfter = mutableMapOf<Int, MutableSet<Int>>()
         rules.forEach { (sooner, later) ->
             shouldBeAfter.putIfAbsent(sooner, mutableSetOf())
@@ -58,9 +44,10 @@ fun main() {
 
         return orderings.filter { line ->
             !isValid(line, shouldBeAfter)
-        }.onEach { line ->
-            loop@while (!isValid(line, shouldBeAfter)) {
+        }.onEach {
+            val line = it.toMutableList()
 
+            loop@while (!isValid(line, shouldBeAfter)) {
                 val numSeenAt = mutableMapOf<Int, Int>()
                 for (i in line.indices) {
                     val num = line[i]
@@ -79,7 +66,6 @@ fun main() {
         }.sumOf { it[it.size / 2].toLong() }
     }
 
-    val input = readInput("Day05")
-    part1(input).println()
-    part2(input).println()
+    part1().println()
+    part2().println()
 }
