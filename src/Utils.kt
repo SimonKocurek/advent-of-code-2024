@@ -81,7 +81,7 @@ fun <T> List<List<T>>.findPosition(element: T): Pair<Int, Int> {
 /**
  * More efficient implementation of `.sorted().take(count)` for small `count`
  */
-fun <T: Comparable<T>> Collection<T>.takeSorted(count: Int): List<T> {
+fun <T : Comparable<T>> Collection<T>.takeSorted(count: Int): List<T> {
     val sorted = PriorityQueue<T>(count, compareByDescending { it })
 
     forEach {
@@ -99,4 +99,8 @@ fun <T: Comparable<T>> Collection<T>.takeSorted(count: Int): List<T> {
     }
     result.reverse()
     return result
+}
+
+fun List<List<*>>.print2d(padding: Int = 3) = forEach { line ->
+    line.joinToString(" ") { it.toString().padStart(padding) }.println()
 }
