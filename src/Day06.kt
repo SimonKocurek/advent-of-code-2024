@@ -47,8 +47,7 @@ fun main() {
             var y = yStart
 
             val visited = mutableSetOf<Triple<Int, Int, Int>>()
-            while (Triple(x, y, directionIndex) !in visited) {
-                visited.add(Triple(x, y, directionIndex))
+            while (visited.add(Triple(x, y, directionIndex))) {
 
                 val (yDiff, xDiff) = directions4[directionIndex]
                 val newY = y + yDiff
