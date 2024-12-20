@@ -1,12 +1,9 @@
-import kotlin.math.min
+import kotlin.math.abs
 
 fun main() {
 
     val input = readInput("Day20")
         .map { it.toList() }
-
-    val (sY, sX) = input.findPosition('S')
-    val (eY, eX) = input.findPosition('E')
 
     fun distanceFrom(sourceX: Int, sourceY: Int): List<List<Int>> {
         val distance = MutableList(input.size) {
@@ -40,50 +37,50 @@ fun main() {
         return distance
     }
 
-    fun part1(): Int {
-        val distancesFromEnd = distanceFrom(eX, eY)
-        val distancesFromStart = distanceFrom(sX, sY)
+    fun distance(x: Int, y: Int, x2: Int, y2: Int) = abs(x - x2) + abs(y - y2)
 
-        val nonCheatingTime = distancesFromEnd[sY][sX]
+    val (sY, sX) = input.findPosition('S')
+    val (eY, eX) = input.findPosition('E')
 
-        val cheatsBySavedSeconds = mutableMapOf<Int, Int>()
+    val distancesFromEnd = distanceFrom(eX, eY)
+    val distancesFromStart = distanceFrom(sX, sY)
+
+    val nonCheatingTime = distancesFromEnd[sY][sX]
+
+    fun cheatsThatSaveTime(needsToSaveTime: Int, cheatLength: Int): Long {
+        val cheatsBySavedSeconds = mutableMapOf<Int, Long>()
         input.doubleLoop { cheatStartY, cheatStartX ->
             if (distancesFromEnd[cheatStartY][cheatStartX] == -1) {
                 // Not reachable
                 return@doubleLoop
             }
 
-            directions4.forEach { (dy, dx) ->
-                val cheatY = cheatStartY + dy
-                val cheatX = cheatStartX + dx
+            for (dy in -cheatLength..cheatLength) {
+                for (dx in -cheatLength..cheatLength) {
+                    if (dy == 0 && dx == 0) {
+                        continue
+                    }
+                    val cheatEndY = cheatStartY + dy
+                    val cheatEndX = cheatStartX + dx
 
-                if (input[cheatY][cheatX] != '#') {
-                    // Cheating on already empty space won't save any time
-                    return@forEach
-                }
-
-                directions4.forEach { (dy2, dx2) ->
-                    val cheatEndY = cheatY + dy2
-                    val cheatEndX = cheatX + dx2
-
-                    if (cheatEndX == cheatStartX && cheatEndY == cheatStartY) {
-                        // Cheat returned back to the original position
-                        return@forEach
+                    val cheatDistance = distance(cheatStartX, cheatStartY, cheatEndX, cheatEndY)
+                    if (cheatDistance > cheatLength) {
+                        continue
                     }
 
                     if (!input.inBounds(cheatEndY, cheatEndX)) {
-                        return@forEach
+                        continue
                     }
 
                     if (distancesFromEnd[cheatEndY][cheatEndX] == -1) {
                         // Cheat arrived at an unreachable position
-                        return@forEach
+                        continue
                     }
 
-                    val timeWithCheat = distancesFromStart[cheatStartY][cheatStartX] + 2 + distancesFromEnd[cheatEndY][cheatEndX]
-                    val savedTime = nonCheatingTime - timeWithCheat
-                    if (savedTime >= 100) {
-                        cheatsBySavedSeconds.merge(savedTime, 1, Int::plus)
+                    val timeWithCheat = distancesFromStart[cheatStartY][cheatStartX] + cheatDistance + distancesFromEnd[cheatEndY][cheatEndX]
+                    val savedTimeByCheat = nonCheatingTime - timeWithCheat
+                    if (savedTimeByCheat >= needsToSaveTime) {
+                        cheatsBySavedSeconds.merge(needsToSaveTime, 1L, Long::plus)
                     }
                 }
             }
@@ -92,7 +89,9 @@ fun main() {
         return cheatsBySavedSeconds.values.sum()
     }
 
-    fun part2() = 0
+    fun part1() = cheatsThatSaveTime(needsToSaveTime = 100, cheatLength = 2)
+
+    fun part2()  = cheatsThatSaveTime(needsToSaveTime = 100, cheatLength = 20)
 
     part1().println()
     part2().println()
