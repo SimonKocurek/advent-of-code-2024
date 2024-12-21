@@ -84,25 +84,38 @@ fun main() {
         "<v>",
     ).toPointMap().toMoves()
 
-    fun shortestOptions(moveOptions: Map<Pair<Char, Char>, String>, sequence: String) = buildString {
+    fun shortestOptions(sequence: String, layer: Int, endLayer: Int, layerCache: MutableMap<Triple<Int, Char, Char>, Long>): Long {
+        var result = 0L
+
         // We start at "A", so the first transition should be from 'A' to the first character
         ("A" + sequence).zipWithNext { fromChar, toChar ->
-            append(moveOptions[fromChar to toChar])
-            append("A")
+
+            val cacheEntry = Triple(layer, fromChar, toChar)
+            if (cacheEntry !in layerCache) {
+                val moveOptions = if (layer == 0) keypad else robotKeypad
+
+                val combination = moveOptions[fromChar to toChar] + "A"
+
+                if (layer == endLayer) {
+                    layerCache[cacheEntry] = combination.length.toLong()
+                } else {
+                    layerCache[cacheEntry] = shortestOptions(combination, layer + 1, endLayer, layerCache)
+                }
+            }
+
+            result += layerCache[cacheEntry]!!
         }
+
+        return result
     }
 
     fun combinationValue(combination: String, robots: Int): Long {
-        val shortestKeypadClicks = shortestOptions(keypad, combination)
+        val layerCache = mutableMapOf<Triple<Int, Char, Char>, Long>()
 
-        var shortestOption = shortestKeypadClicks
-        for (robot in 1..robots) {
-            shortestOption = shortestOptions(robotKeypad, shortestOption)
-        }
-
+        val shortestOption = shortestOptions(combination, 0, robots, layerCache)
         val digitValue = combination.takeWhile { it.isDigit() }.toLong()
 
-        return shortestOption.length * digitValue
+        return shortestOption * digitValue
     }
 
     fun part1() = input.sumOf { combinationValue(combination = it, robots = 2) }
@@ -110,5 +123,5 @@ fun main() {
     fun part2() = input.sumOf { combinationValue(combination = it, robots = 25) }
 
     part1().println()
-//    part2().println()
+    part2().println()
 }
