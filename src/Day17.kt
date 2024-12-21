@@ -98,6 +98,8 @@ fun main() {
         var possibleA = mutableSetOf<Long>()
         possibleA.add(0L)
 
+        // Go from the back of the program and try to find all possible 'a' values
+        // that would match the ending of the program
         for (matchFromEnd in 1..program.size) {
             val newPossibleA = mutableSetOf<Long>()
 
@@ -111,7 +113,7 @@ fun main() {
                         continue
                     }
 
-                    val foundA = if (matchFromEnd == program.size) triedA else triedA shl 3
+                    val foundA = if (matchFromEnd == program.size) triedA else triedA * 8
                     newPossibleA.add(foundA)
                 }
             }
