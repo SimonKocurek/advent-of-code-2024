@@ -36,7 +36,7 @@ val directions8 = listOf(
 )
 
 /**
- * Up, down, left and right
+ * Up, right, down and left
  */
 val directions4 = listOf(
     -1 to 0,
